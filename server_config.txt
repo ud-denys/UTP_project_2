@@ -1,0 +1,3 @@
+port=60000
+name=s34471Server
+banned_phrases=spam,offensive,ban
