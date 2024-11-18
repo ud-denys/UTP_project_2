@@ -11,7 +11,7 @@ public class Client {
     private Socket socket;
     private PrintWriter out;
     private Scanner in;
-    private static String name; // Store the client's name
+    private static String name;
 
 
     public Client(String serverAddress, int serverPort) {
@@ -24,11 +24,11 @@ public class Client {
             socket = new Socket(serverAddress, serverPort);
 //            System.out.println("Connected to server at " + serverAddress + ":" + serverPort);
 
-            // Initialize input and output streams
+
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new Scanner(socket.getInputStream());
 
-            // Prompt for name and send it to the server
+
             Scanner userInput = new Scanner(System.in);
             System.out.print("Enter your name: ");
             name = userInput.nextLine();
