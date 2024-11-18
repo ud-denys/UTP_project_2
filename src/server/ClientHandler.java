@@ -12,18 +12,19 @@ public class ClientHandler implements Runnable {
     private Scanner in;
     private String clientName;
 
-    // Constructor to initialize with client socket and server reference
     public ClientHandler(Socket clientSocket, Server server) {
         this.clientSocket = clientSocket;
         this.server = server;
         try {
-
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             in = new Scanner(clientSocket.getInputStream());
 
+            if (in.hasNextLine()) {
+                clientName = in.nextLine();
+            }
 
-            clientName = clientSocket.getRemoteSocketAddress().toString();
-            server.broadcastMessage("New client connected: " + clientName);
+            server.broadcastMessage(clientName + " entered the chat." , this);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -33,42 +34,24 @@ public class ClientHandler implements Runnable {
     public void run() {
         while (in.hasNextLine()) {
             String message = in.nextLine();
-
-            if (containsBannedPhrase(message)) {
-                out.println("Your message contains banned content and was not sent.");
-            } else {
-                System.out.println("Received from " + clientName + ": " + message);
-                server.broadcastMessage(clientName + ": " + message);
-            }
+            System.out.println("Server received from " + clientName + ": " + message);
+            server.broadcastMessage(clientName + ": " + message, this); // Broadcast to others
         }
         closeConnection();
     }
 
-
-    // Method to check if a message contains any banned phrases
-    private boolean containsBannedPhrase(String message) {
-        for (String bannedPhrase : server.getBannedPhrases()) {
-            if (message.toLowerCase().contains(bannedPhrase.toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // Send a message to this client
     public void sendMessage(String message) {
         out.println(message);
     }
 
-    // Close client connection
     private void closeConnection() {
         try {
             clientSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        server.removeClient(this); // Remove client from the server’s list
-        server.broadcastMessage(clientName + " has disconnected.");
+        server.removeClient(this);
+        server.broadcastMessage(clientName + " left.", this);
     }
 
     public String getClientName() {

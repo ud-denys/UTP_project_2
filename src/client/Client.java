@@ -11,47 +11,50 @@ public class Client {
     private Socket socket;
     private PrintWriter out;
     private Scanner in;
+    private static String name; // Store the client's name
 
-    // Constructor that takes server address and port
+
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
         this.serverPort = serverPort;
     }
 
-    // Method to connect to the server
     public void connect() {
         try {
-            // Create socket and connect to server
             socket = new Socket(serverAddress, serverPort);
-            System.out.println("Connected to server at " + serverAddress + ":" + serverPort);
+//            System.out.println("Connected to server at " + serverAddress + ":" + serverPort);
 
             // Initialize input and output streams
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new Scanner(socket.getInputStream());
+
+            // Prompt for name and send it to the server
+            Scanner userInput = new Scanner(System.in);
+            System.out.print("Enter your name: ");
+            name = userInput.nextLine();
+            out.println(name);
 
         } catch (IOException e) {
             System.err.println("Unable to connect to server: " + e.getMessage());
         }
     }
 
-    // Method to send a message to the server
     public void sendMessage(String message) {
         if (out != null) {
             out.println(message);
         }
     }
 
-    // Method to receive messages from the server (renamed to getMessage)
+
     public void getMessage() {
         new Thread(() -> {
             while (in.hasNextLine()) {
                 String serverMessage = in.nextLine();
-                System.out.println("Server: " + serverMessage);
+                System.out.print("\r" + serverMessage + "\n" + name + ": ");
             }
         }).start();
     }
 
-    // Method to close the connection
     public void close() {
         try {
             if (socket != null) {
@@ -62,16 +65,22 @@ public class Client {
         }
     }
 
-    // Main method for testing the client
+
     public static void main(String[] args) {
-        Client client = new Client("localhost", 60000); // Replace "localhost" with the server address if needed
+        Client client = new Client("localhost", 60000);
         client.connect();
         client.getMessage();
 
-        // Send a test message (optional)
-        client.sendMessage("Here it is - spam!");
+        Scanner userInput = new Scanner(System.in);
+        while (true) {
+            System.out.print(name + ": ");
+            String message = userInput.nextLine();
+            client.sendMessage(message);
 
-
-//        client.close();
+//            if (message.equalsIgnoreCase("exit")) {
+//                client.close();
+//                break;
+//            }
+        }
     }
 }
