@@ -11,8 +11,7 @@ public class Client {
     private Socket socket;
     private PrintWriter out;
     private Scanner in;
-    private static String name;
-
+    private String name;
 
     public Client(String serverAddress, int serverPort) {
         this.serverAddress = serverAddress;
@@ -22,18 +21,15 @@ public class Client {
     public void connect() {
         try {
             socket = new Socket(serverAddress, serverPort);
-//            System.out.println("Connected to server at " + serverAddress + ":" + serverPort);
-
+            System.out.println("Connected to server at " + serverAddress + ":" + serverPort);
 
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new Scanner(socket.getInputStream());
-
 
             Scanner userInput = new Scanner(System.in);
             System.out.print("Enter your name: ");
             name = userInput.nextLine();
             out.println(name);
-
         } catch (IOException e) {
             System.err.println("Unable to connect to server: " + e.getMessage());
         }
@@ -44,7 +40,6 @@ public class Client {
             out.println(message);
         }
     }
-
 
     public void getMessage() {
         new Thread(() -> {
@@ -65,7 +60,6 @@ public class Client {
         }
     }
 
-
     public static void main(String[] args) {
         Client client = new Client("localhost", 60000);
         client.connect();
@@ -73,14 +67,14 @@ public class Client {
 
         Scanner userInput = new Scanner(System.in);
         while (true) {
-            System.out.print(name + ": ");
+            System.out.print(client.name + ": ");
             String message = userInput.nextLine();
             client.sendMessage(message);
 
-//            if (message.equalsIgnoreCase("exit")) {
-//                client.close();
-//                break;
-//            }
+            if (message.equalsIgnoreCase("/exit")) {
+                client.close();
+                break;
+            }
         }
     }
 }
